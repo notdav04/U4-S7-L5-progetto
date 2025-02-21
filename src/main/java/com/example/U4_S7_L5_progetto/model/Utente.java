@@ -31,11 +31,11 @@ public class Utente {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany()
-    @JoinTable( name="utente_ruolo",
-            joinColumns = @JoinColumn(name="utente_id"),
-            inverseJoinColumns =  @JoinColumn(name="ruolo_id"))
-    private Set<Ruolo> ruolo = new HashSet<>();
+//    @ManyToMany()
+//    @JoinTable( name="utente_ruolo",
+//            joinColumns = @JoinColumn(name="utente_id"),
+//            inverseJoinColumns =  @JoinColumn(name="ruolo_id"))
+//    private Set<Ruolo> ruolo = new HashSet<>();
 
 
 }
