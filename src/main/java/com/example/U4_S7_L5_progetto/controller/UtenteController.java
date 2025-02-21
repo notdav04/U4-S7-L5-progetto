@@ -1,5 +1,7 @@
 package com.example.U4_S7_L5_progetto.controller;
 
+import com.example.U4_S7_L5_progetto.exception.EmailDuplicateException;
+import com.example.U4_S7_L5_progetto.exception.UsernameDuplicateException;
 import com.example.U4_S7_L5_progetto.payload.UtenteDTO;
 import com.example.U4_S7_L5_progetto.service.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class UtenteController {
     @PostMapping("/new")
     public ResponseEntity<String> registrazioneUtente(@Validated @RequestBody UtenteDTO nuovoUtente, BindingResult validazione){
 
-//        try {
+        try {
 
             if(validazione.hasErrors()){
                 StringBuilder errori = new StringBuilder("Problemi nella validazione dati :\n");
@@ -32,17 +34,15 @@ public class UtenteController {
                 for(ObjectError errore : validazione.getAllErrors()){
                     errori.append(errore.getDefaultMessage()).append("\n");
                 }
-
                 return new ResponseEntity<>(errori.toString(), HttpStatus.BAD_REQUEST);
-
             }
 
             String messaggio =utenteService.insertUtente(nuovoUtente);
             return new ResponseEntity<>(messaggio, HttpStatus.OK);
-//        } catch (UsernameDuplicateException e) {
-//            return new ResponseEntity<>("Username già utilizzato", HttpStatus.BAD_REQUEST);
-//        } catch (EmailDuplicateException e) {
-//            return new ResponseEntity<>("Email non disponibile", HttpStatus.BAD_REQUEST);
-//        }
+        } catch (UsernameDuplicateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (EmailDuplicateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

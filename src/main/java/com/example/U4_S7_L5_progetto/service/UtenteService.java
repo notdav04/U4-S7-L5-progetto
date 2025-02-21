@@ -1,5 +1,7 @@
 package com.example.U4_S7_L5_progetto.service;
 
+import com.example.U4_S7_L5_progetto.exception.EmailDuplicateException;
+import com.example.U4_S7_L5_progetto.exception.UsernameDuplicateException;
 import com.example.U4_S7_L5_progetto.model.Utente;
 import com.example.U4_S7_L5_progetto.payload.UtenteDTO;
 import com.example.U4_S7_L5_progetto.repository.UtenteDAORepository;
@@ -18,12 +20,26 @@ public class UtenteService {
 
 
     //salva nuovo utente (registrazione)
-    public String insertUtente(UtenteDTO user){
+    public String insertUtente(UtenteDTO user) throws UsernameDuplicateException, EmailDuplicateException {
+        checkDuplicateKey(user.getUsername(), user.getEmail());
         Utente utente = dto_entity(user);
         long id  = utenteDAO.save(utente).getId();
         return "utente aggiunto correttamente con id: " + id;
     }
 
+
+
+
+
+    //controllo le chiavi duplicate per username e email
+    public void checkDuplicateKey(String username, String email) throws UsernameDuplicateException, EmailDuplicateException {
+        if (utenteDAO.existsByUsername(username)){
+            throw new UsernameDuplicateException("username gia presente");
+        }
+        if (utenteDAO.existsByEmail(email)){
+            throw new EmailDuplicateException("email gia presente");
+        }
+    }
 
 
     //travasi
