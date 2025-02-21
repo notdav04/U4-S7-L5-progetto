@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,11 +32,16 @@ public class Utente {
     @Column(nullable = false)
     private String password;
 
-//    @ManyToMany()
-//    @JoinTable( name="utente_ruolo",
-//            joinColumns = @JoinColumn(name="utente_id"),
-//            inverseJoinColumns =  @JoinColumn(name="ruolo_id"))
-//    private Set<Ruolo> ruolo = new HashSet<>();
+    //per organizzatori
+    @OneToMany
+    private List<Evento> listaEventi ;
+
+    //per utenti semplici
+    @OneToMany
+    private List<Prenotazione> listaPrenotazioni;
+
+    @ManyToOne
+    private Ruolo ruolo ;
 
 
 }
