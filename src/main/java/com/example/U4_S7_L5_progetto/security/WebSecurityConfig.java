@@ -5,10 +5,13 @@ import com.example.U4_S7_L5_progetto.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +21,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 @EnableWebSecurity(debug = true)
 public class WebSecurityConfig {
+
+
 
     @Autowired
     UserDetailsServiceImpl detailsImpl;
@@ -30,6 +35,11 @@ public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     // FORNISCE L'AUTENTICAZIONE ATTRAVERSO I DETTAGLI USERNAME E PASSWORD
@@ -58,7 +68,8 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(gestoreNOAuthorization))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/utente/**").permitAll() // Endpoint pubblici (registrazione/login)
+                                .requestMatchers("/utente/new").permitAll()
+                        .requestMatchers("/utente/login").permitAll()// Endpoint pubblici (registrazione/login)
                                 .requestMatchers("/eventi/**").hasAuthority("ROLE_ORGANIZZATORE") // Solo organizzatori possono gestire eventi
                                 .requestMatchers("/prenotazioni/**").hasAuthority("ROLE_USER")// Solo utenti possono prenotare
                                 .anyRequest().authenticated());
