@@ -10,6 +10,7 @@ import com.example.U4_S7_L5_progetto.payload.request.RegistrazioneRequest;
 import com.example.U4_S7_L5_progetto.repository.RuoloDAORepository;
 import com.example.U4_S7_L5_progetto.repository.UtenteDAORepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class UtenteService {
     UtenteDAORepository utenteDAO;
     @Autowired
     RuoloDAORepository ruoloDAO;
+
+    @Autowired
+    PasswordEncoder passEncoder;
 
 
     //salva nuovo utente (registrazione)
@@ -68,12 +72,14 @@ public class UtenteService {
     }
 
     public Utente registrazioneRequest_Utente(RegistrazioneRequest request) {
+
         Utente utente = new Utente();
         utente.setEmail(request.getEmail());
         utente.setNome(request.getNome());
         utente.setUsername(request.getUsername());
         utente.setCognome(request.getCognome());
-        utente.setPassword(request.getPassword());
+        String codificaPassword = passEncoder.encode(request.getPassword()); //codifica della password(prima non stavo facendo)
+        utente.setPassword(codificaPassword);
 
 
         if (request.getRuolo() == null) {

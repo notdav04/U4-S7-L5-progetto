@@ -16,6 +16,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.U4_S7_L5_progetto.security.jwt.FiltroAuthToken;
+
 
 @Configuration
 @EnableMethodSecurity
@@ -73,8 +76,16 @@ public class WebSecurityConfig {
                                 .requestMatchers("/eventi/**").hasAuthority("ROLE_ORGANIZZATORE") // Solo organizzatori possono gestire eventi
                                 .requestMatchers("/prenotazioni/**").hasAuthority("ROLE_USER")// Solo utenti possono prenotare
                                 .anyRequest().authenticated());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);//mancava questa riga
 
         http.authenticationProvider(authenticationProvider());
         return http.build();
     }
+
+    @Bean
+    public FiltroAuthToken authenticationJwtTokenFilter() {
+        return new FiltroAuthToken();
+    }
 }
+
+

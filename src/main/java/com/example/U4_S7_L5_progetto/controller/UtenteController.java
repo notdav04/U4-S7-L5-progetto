@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -42,20 +43,20 @@ public class UtenteController {
 
 
     @PostMapping("/new")
-    public ResponseEntity<String> registrazioneUtente(@Validated @RequestBody RegistrazioneRequest nuovoUtente, BindingResult validazione){
+    public ResponseEntity<String> registrazioneUtente(@Validated @RequestBody RegistrazioneRequest nuovoUtente, BindingResult validazione) {
 
         try {
 
-            if(validazione.hasErrors()){
+            if (validazione.hasErrors()) {
                 StringBuilder errori = new StringBuilder("Problemi nella validazione dati :\n");
 
-                for(ObjectError errore : validazione.getAllErrors()){
+                for (ObjectError errore : validazione.getAllErrors()) {
                     errori.append(errore.getDefaultMessage()).append("\n");
                 }
                 return new ResponseEntity<>(errori.toString(), HttpStatus.BAD_REQUEST);
             }
 
-            String messaggio =utenteService.insertUtente(nuovoUtente);
+            String messaggio = utenteService.insertUtente(nuovoUtente);
             return new ResponseEntity<>(messaggio, HttpStatus.OK);
         } catch (UsernameDuplicateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -65,46 +66,52 @@ public class UtenteController {
     }
 
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Validated @RequestBody LoginRequest loginDto, BindingResult validazione){
+    @PostMapping(name= "/login", produces = "application/json")
+    public ResponseEntity<?> login(@Validated @RequestBody LoginRequest loginDto, BindingResult validazione) {
 
         // VALIDAZIONE
-        if(validazione.hasErrors()){
+        if (validazione.hasErrors()) {
             StringBuilder errori = new StringBuilder("Problemi nella validazione dati :\n");
 
-            for(ObjectError errore : validazione.getAllErrors()){
+            for (ObjectError errore : validazione.getAllErrors()) {
                 errori.append(errore.getDefaultMessage()).append("\n");
             }
 
             return new ResponseEntity<>(errori.toString(), HttpStatus.BAD_REQUEST);
 
         }
+        try {
 
-        //Generiamo un oggetto che occorre per l'autenticazione
-        UsernamePasswordAuthenticationToken tokenNoAuth = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
-        // Invocare e a recuperare l'authentication -> autenticazione va a buon fine
-        // Utilizziamo il gestore delle autenticazioni che si basa su Useername e Password
-        // Recuperiamo l'autenticazione attraverso il metodo authenticate
-        Authentication autenticazione = authenticationManager.authenticate(tokenNoAuth);
+            //Generiamo un oggetto che occorre per l'autenticazione
+            UsernamePasswordAuthenticationToken tokenNoAuth = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
-        // Impostare l'autenticazione nel contesto di sicurezza Spring
-        SecurityContextHolder.getContext().setAuthentication(autenticazione);
+            // Invocare e a recuperare l'authentication -> autenticazione va a buon fine
+            // Utilizziamo il gestore delle autenticazioni che si basa su Useername e Password
+            // Recuperiamo l'autenticazione attraverso il metodo authenticate
+            Authentication autenticazione = authenticationManager.authenticate(tokenNoAuth);
 
-        // Generiamo il TOKEN FINALE (String)
-        String token = jwtUtils.creaJwtToken(autenticazione);
+            // Impostare l'autenticazione nel contesto di sicurezza Spring
+            SecurityContextHolder.getContext().setAuthentication(autenticazione);
 
-        // Recuperando le info che vogliamo inserire nella risposta al client
-        UserDetailsImpl dettagliUtente = (UserDetailsImpl) autenticazione.getPrincipal();
-        List<String> ruoliweb = dettagliUtente.getAuthorities().stream()
-                .map((item->item.getAuthority()))
-                .collect(Collectors.toList());
+            // Generiamo il TOKEN FINALE (String)
+            String token = jwtUtils.creaJwtToken(autenticazione);
 
-        // Creare un oggetto JWTresponse
-        JwtResponse responseJWT = new JwtResponse(dettagliUtente.getUsername(), dettagliUtente.getId(),dettagliUtente.getEmail() , ruoliweb, token);
+            // Recuperando le info che vogliamo inserire nella risposta al client
+            UserDetailsImpl dettagliUtente = (UserDetailsImpl) autenticazione.getPrincipal();
+            List<String> ruoliweb = dettagliUtente.getAuthorities().stream()
+                    .map((item -> item.getAuthority()))
+                    .collect(Collectors.toList());
 
-        // Gestione della risposta al Client -> ResponseEntity
-        return new ResponseEntity<>(responseJWT, HttpStatus.OK);
+            // Creare un oggetto JWTresponse
+            JwtResponse responseJWT = new JwtResponse(dettagliUtente.getUsername(), dettagliUtente.getId(), dettagliUtente.getEmail(), ruoliweb, token);
 
+            // Gestione della risposta al Client -> ResponseEntity
+            return new ResponseEntity<>(responseJWT, HttpStatus.OK);
+        } catch (
+                AuthenticationException e) {
+            return new ResponseEntity<>("credenziali errate!", HttpStatus.UNAUTHORIZED); //errore di autenticazione
+
+        }
     }
 }

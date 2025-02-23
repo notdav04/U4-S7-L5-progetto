@@ -29,7 +29,7 @@ public class JwtUtils {
     public String creaJwtToken(Authentication autenticazione) {
 
         // Recupero il dettaglio principal (username)
-        UserDetailsImpl utentePrincipal = (UserDetailsImpl) autenticazione.getDetails();
+        UserDetailsImpl utentePrincipal = (UserDetailsImpl) autenticazione.getPrincipal(); //prima usavo getDetails, che era sbagloiato
 
         // Creazione del JWT
         return Jwts.builder()
