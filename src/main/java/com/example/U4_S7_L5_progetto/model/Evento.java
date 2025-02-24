@@ -42,7 +42,7 @@ public class Evento {
     @JsonIgnore
     private Utente creatoreEvento;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
 //    @JoinColumn(name = "prenotazione_id")
     @JsonIgnore
     private List<Prenotazione> listaPrenotazioni;

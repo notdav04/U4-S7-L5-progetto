@@ -161,5 +161,55 @@ public class UtenteController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/evento/all")
+    @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
+
+    public ResponseEntity<?> getEventi(Authentication authentication){
+        try{
+            String username = authentication.getName();
+            List<EventoDTO> listaDTO = eventoService.getEventi(username);
+            return new ResponseEntity<>(listaDTO, HttpStatus.OK);
+        }catch(RuntimeException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/prenotazione/{idPrenotazione}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
+    public ResponseEntity<?> deletePrenotazione(@PathVariable long idPrenotazione, Authentication authentication){
+        try{
+            String username = authentication.getName();
+            String message = prenotazioneService.removePrenotazione(idPrenotazione, username);
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        }catch(RuntimeException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/evento/{idEvento}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
+    public ResponseEntity<?> updateEvento (@Validated @RequestBody EventoDTO eventoDTO, @PathVariable long idEvento, BindingResult validazione) {
+        if(validazione.hasErrors()){
+            StringBuilder errori = new StringBuilder("Problemi nella validazione dati :\n");
+
+            for(ObjectError errore : validazione.getAllErrors()){
+                errori.append(errore.getDefaultMessage()).append("\n");
+            }
+            return new ResponseEntity<>(errori.toString(), HttpStatus.BAD_REQUEST);
+        }
+
+        String messaggio = eventoService.updateEvento(eventoDTO, idEvento);
+        return new ResponseEntity<>(messaggio, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/org/{idEvento}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
+    public ResponseEntity<?> deleteEvento( @PathVariable long idEvento, Authentication authentication) {
+        String username = authentication.getName();
+        String messaggio = eventoService.deleteEvento(idEvento, username);
+        return new ResponseEntity<>(messaggio, HttpStatus.OK);
+    }
+
 }
 

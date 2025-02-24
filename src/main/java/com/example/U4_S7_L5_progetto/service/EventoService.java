@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @Transactional
 public class EventoService {
@@ -27,14 +31,50 @@ public class EventoService {
 
         Evento evento = dto_entity(eventoDTO);
         evento.setCreatoreEvento(org);
+        org.addEvento(evento);
 
         long eventoId = eventoDAO.save(evento).getId();
         return "evento salvato con id " + eventoId;
     }
 
-    public String getEventi(String username){
+
+
+    public List<EventoDTO> getEventi(String username){
         Utente utente = utenteDAO.findByUsername(username).orElseThrow(()->new RuntimeException("utente non trovato"));
-        return "ok";
+        List<Evento> lista = utente.getListaEventi();
+        List<EventoDTO> listaDTO = new ArrayList<>();
+        lista.forEach(ele->listaDTO.add(entity_dto(ele)));
+//        listaDTO.forEach(ele-> System.out.println(ele));
+        return listaDTO;
+    }
+
+    public String updateEvento(EventoDTO eventoDTO, long idEvento) {
+        Evento evento = eventoDAO.findById(idEvento).orElseThrow(()->new RuntimeException("evento non trovato!"));
+            evento.setTitolo(eventoDTO.getTitolo());
+            evento.setDescrizione(eventoDTO.getDescrizione());
+            evento.setData(eventoDTO.getData());
+            evento.setLuogo(eventoDTO.getLuogo());
+            evento.setNPostiDisponibili(eventoDTO.getNPostiDisponibili());
+            eventoDAO.save(evento);
+        return "Evento aggiornato correttamente";
+    }
+    public String deleteEvento(long eventoId, String username) {
+        Optional<Evento> eventoTrovato = eventoDAO.findById(eventoId);
+        Optional<Utente> organizzTrovato = utenteDAO.findByUsername(username);
+        if (eventoTrovato.isPresent() && organizzTrovato.isPresent()) {
+            Evento evento = eventoTrovato.get();
+            Utente org = organizzTrovato.get();
+
+            if(evento.getCreatoreEvento().equals(org)) {
+                eventoDAO.delete(evento);
+                return "Evento rimosso con successo !";
+            }else {
+                throw new RuntimeException("non puoi cancellare un evento altrui!");
+            }
+
+        } else {
+            throw new RuntimeException("evento non trovato!");
+        }
     }
 
 

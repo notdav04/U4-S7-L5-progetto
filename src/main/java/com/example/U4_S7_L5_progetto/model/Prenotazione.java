@@ -18,7 +18,8 @@ public class Prenotazione {
     @ManyToOne
     private Utente utente;
 
-    @ManyToOne
+    @ManyToOne()
+
     private Evento evento;
 
 }
