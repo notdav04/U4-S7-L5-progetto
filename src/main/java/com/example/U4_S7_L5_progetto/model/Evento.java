@@ -1,6 +1,8 @@
 package com.example.U4_S7_L5_progetto.model;
 
 
+import com.example.U4_S7_L5_progetto.payload.PrenotazioneDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,9 +39,20 @@ public class Evento {
 
     @ManyToOne
     @JoinColumn(name= "utente_id")
+    @JsonIgnore
     private Utente creatoreEvento;
 
     @OneToMany
 //    @JoinColumn(name = "prenotazione_id")
+    @JsonIgnore
     private List<Prenotazione> listaPrenotazioni;
+
+
+    public void diminuisciPosti(){
+        nPostiDisponibili--;
+    }
+
+    public void addPrenotazione(Prenotazione p){
+        listaPrenotazioni.add(p);
+    }
 }

@@ -9,17 +9,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-
     @Autowired
-    UtenteDAORepository utenteDAO;
+    UtenteDAORepository repoUser;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Utente> utente = utenteDAO.findByUsername(username);
+        Optional<Utente> utente = repoUser.findByUsername(username);
         Utente user = utente.orElseThrow();
         return UserDetailsImpl.costruisciDettagli(user);
-
     }
-
 }

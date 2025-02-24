@@ -1,6 +1,7 @@
 package com.example.U4_S7_L5_progetto.security;
 
-import com.example.U4_S7_L5_progetto.security.jwt.AuthEnrtyPoint;
+import com.example.U4_S7_L5_progetto.security.jwt.AuthEntryPoint;
+import com.example.U4_S7_L5_progetto.security.jwt.AuthTokenFilter;
 import com.example.U4_S7_L5_progetto.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,81 +12,59 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.example.U4_S7_L5_progetto.security.jwt.FiltroAuthToken;
-
 
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity(debug = true)
-public class WebSecurityConfig {
-
-
-
+public class WebSecurityConfig{
     @Autowired
     UserDetailsServiceImpl detailsImpl;
 
     @Autowired
-    AuthEnrtyPoint gestoreNOAuthorization;
+    AuthEntryPoint gestoreNOAuthorization;
 
-
-    // Spring crea in automatico un oggetto Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    // FORNISCE L'AUTENTICAZIONE ATTRAVERSO I DETTAGLI USERNAME E PASSWORD
-    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // Gestione di come deve essere creato e inizializzato l'oggetto DaoAuthenticationProvider
         DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-
-        // L'oggetto importa tutti i dettagli utente
         auth.setUserDetailsService(detailsImpl);
-
-        // DaoAuthenticationProvider fornisce un metodo per accettare la password criptata.
         auth.setPasswordEncoder(passwordEncoder());
 
         return auth;
     }
+//mancava
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-
-    // Gestora csrf
-    // Andiamo ad impostare il nostro gestore delle autorizzazioni KO
-    // Gestione della sessione
-    // Gestione autorizzazioni sulle richieste (a livello controller / a livello di singoli servizi controller)
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        //nota mancano i cors, vedi dopo se serve inserirli o meno
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(gestoreNOAuthorization))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/utente/new").permitAll()
-                        .requestMatchers("/utente/login").permitAll()// Endpoint pubblici (registrazione/login)
-                                .requestMatchers("/eventi/**").hasAuthority("ROLE_ORGANIZZATORE") // Solo organizzatori possono gestire eventi
-                                .requestMatchers("/prenotazioni/**").hasAuthority("ROLE_USER")// Solo utenti possono prenotare
-                                .anyRequest().authenticated());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);//mancava questa riga
-
+                        .requestMatchers("/utente/**").permitAll() // Endpoint pubblici (registrazione/login)
+                        .requestMatchers("/utente/evento/**").hasAuthority("ROLE_ORGANIZZATORE") // Solo organizzatori possono gestire eventi
+                        .requestMatchers("/utente/prenotazione/**").hasAuthority("ROLE_USER")// Solo utenti possono prenotare
+                        .anyRequest().authenticated());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);//mancava
         http.authenticationProvider(authenticationProvider());
         return http.build();
     }
-
+//mancava
     @Bean
-    public FiltroAuthToken authenticationJwtTokenFilter() {
-        return new FiltroAuthToken();
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
     }
 }
-
-

@@ -1,5 +1,6 @@
 package com.example.U4_S7_L5_progetto.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.util.Set;
 public class Utente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private long id;
 
     private String nome;
@@ -30,10 +32,12 @@ public class Utente {
     private String username;
 
     @Column(nullable = false)
+
     private String password;
 
     //per organizzatori
     @OneToMany
+
     private List<Evento> listaEventi ;
 
     //per utenti semplici
@@ -42,6 +46,14 @@ public class Utente {
 
     @ManyToOne
     private Ruolo ruolo ;
+
+    public void addPrenotazione(Prenotazione p){
+        this.listaPrenotazioni.add(p);
+    }
+
+    public void addEvento(Evento e){
+        this.listaEventi.add(e);
+    }
 
 
 }

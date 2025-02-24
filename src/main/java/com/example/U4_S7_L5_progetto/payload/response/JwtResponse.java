@@ -24,5 +24,5 @@ public class JwtResponse {
         this.email = email;
         this.ruoli = ruoli;
         this.token = token;
-    }
+}
 }

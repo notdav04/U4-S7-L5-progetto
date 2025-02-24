@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+
 @Data
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
@@ -20,11 +21,10 @@ public class UserDetailsImpl implements UserDetails {
     private String email;
     @JsonIgnore
     private String password;
-
     private Ruolo ruolo;
 
-    public static UserDetailsImpl costruisciDettagli(Utente utente){
-        return new UserDetailsImpl(utente.getId(), utente.getUsername(),utente.getEmail(), utente.getPassword(), utente.getRuolo() );
+    public static UserDetailsImpl costruisciDettagli(Utente user) {
+        return new UserDetailsImpl(user.getId(),user.getUsername(),user.getEmail(), user.getPassword(), user.getRuolo());
     }
 
     @Override
@@ -34,7 +34,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;//non stavo ritornando nulla
+        return password;//mancava
     }
 
     @Override
