@@ -79,9 +79,9 @@ public class PrenotazioneService {
         return dto;
     }
 
+
     public String removePrenotazione(long idPrenotazione, String username){
         Utente utente = utenteDAO.findByUsername(username).orElseThrow(()->new RuntimeException("utente non trovato"));
-
         Prenotazione prenotazione  = prenotazioneDAO.findById(idPrenotazione).orElseThrow(()->new RuntimeException("prenotazione non trovate!"));
         if (prenotazione.getUtente().getId() == utente.getId()){
             prenotazioneDAO.deleteById(idPrenotazione);

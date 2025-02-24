@@ -54,7 +54,11 @@ public class UtenteController {
     @Autowired
     UtenteDAORepository utenteDAO;
 
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //                      prima di provare bisogna aggiungere i ruoli
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    //registrazione
     @PostMapping("/new")
     public ResponseEntity<String> registrazioneUtente(@Validated @RequestBody RegistrazioneRequest nuovoUtente, BindingResult validazione) {
 
@@ -78,7 +82,7 @@ public class UtenteController {
         }
     }
 
-
+    //login
     @PostMapping("/login")
     public ResponseEntity<?> login(@Validated @RequestBody LoginRequest loginDto, BindingResult validazione) {
         if (validazione.hasErrors()) {
@@ -90,6 +94,7 @@ public class UtenteController {
         }
 
         try {
+
             Authentication autenticazione = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword())
             );
@@ -117,7 +122,7 @@ public class UtenteController {
         }
     }
 
-
+    //metodo che crea l evento
     @PostMapping("evento/new")
     @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
     public ResponseEntity<?> creaEvento(@RequestBody @Validated EventoDTO eventoDTO, BindingResult validation, Authentication authentication){
@@ -137,7 +142,7 @@ public class UtenteController {
         return new ResponseEntity<>(messaggio, HttpStatus.OK);
     }
 
-
+    //metodo che crea la prenotazione
     @PostMapping("/prenotazione/{idEvento}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public ResponseEntity<?> creaPrenotazione(@PathVariable long idEvento, Authentication authentication){
@@ -149,7 +154,7 @@ public class UtenteController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
+    //metodo che mostra la lista prenotazioni di un utente
     @GetMapping("/prenotazione/all")
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public ResponseEntity<?> getPrenotazioni(Authentication authentication){
@@ -161,10 +166,9 @@ public class UtenteController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
+    //metodo che mostra la lista di eventi di un organizzatore
     @GetMapping("/evento/all")
     @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
-
     public ResponseEntity<?> getEventi(Authentication authentication){
         try{
             String username = authentication.getName();
@@ -174,7 +178,7 @@ public class UtenteController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
+    //metodo delete prenotazione
     @DeleteMapping("/prenotazione/{idPrenotazione}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public ResponseEntity<?> deletePrenotazione(@PathVariable long idPrenotazione, Authentication authentication){
@@ -186,7 +190,7 @@ public class UtenteController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
+    //metodo modifica evento
     @PutMapping("/evento/{idEvento}")
     @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
     public ResponseEntity<?> updateEvento (@Validated @RequestBody EventoDTO eventoDTO, @PathVariable long idEvento, BindingResult validazione) {
@@ -202,7 +206,7 @@ public class UtenteController {
         String messaggio = eventoService.updateEvento(eventoDTO, idEvento);
         return new ResponseEntity<>(messaggio, HttpStatus.OK);
     }
-
+    //metodo delete evento
     @DeleteMapping("/evento/{idEvento}")
     @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
     public ResponseEntity<?> deleteEvento( @PathVariable long idEvento, Authentication authentication) {
