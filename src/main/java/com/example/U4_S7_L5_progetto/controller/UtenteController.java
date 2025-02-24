@@ -203,7 +203,7 @@ public class UtenteController {
         return new ResponseEntity<>(messaggio, HttpStatus.OK);
     }
 
-    @DeleteMapping("/org/{idEvento}")
+    @DeleteMapping("/evento/{idEvento}")
     @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZZATORE')")
     public ResponseEntity<?> deleteEvento( @PathVariable long idEvento, Authentication authentication) {
         String username = authentication.getName();

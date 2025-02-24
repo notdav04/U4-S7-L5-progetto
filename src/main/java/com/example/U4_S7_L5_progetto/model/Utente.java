@@ -41,7 +41,7 @@ public class Utente {
     private List<Evento> listaEventi ;
 
     //per utenti semplici
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Prenotazione> listaPrenotazioni;
 
     @ManyToOne
